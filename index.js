@@ -4,7 +4,7 @@ const inquirer = require("inquirer");
 let guesses = 7;
 let wordGuessed = false;
 let guessedWord;
-let currentWord;
+let currentWordObject;
 
 
 const wordOptions = [
@@ -12,47 +12,43 @@ const wordOptions = [
 ];
 
 const newWordCreator = ()=>{
+    //randomnly select number to select word from Arr
     let randomNum = Math.floor(Math.random()* wordOptions.length);
     // console.log("RANDOM NUMBER", randomNum)
     let newWord = new Word(wordOptions[randomNum]);
     newWord.letterCreator();
-    currentWord = newWord;
-    // console.log("GLOBAL CURRENTWORD OBJECT", currentWord);
+    //global variable for current word object
+    currentWordObject = newWord;
     guessedWord = newWord.stringMaker();
+    //show the current word string (alerts user to the number of spaces)
     console.log(guessedWord);
+    //start game
     playGame();  
 }
 
 const checkPlayerGuess = (letter)=>{
-    currentWord.guessChecker(letter);
-    guessedWord = currentWord.stringMaker();
+    currentWordObject.guessChecker(letter);
+    guessedWord = currentWordObject.stringMaker();
 }
 //function to check if word has been guessed
 const checkWordGuessed = ()=> {
-    // console.log(currentWord.letterArr);
+    // arr to hold letters with false boolean for guessed
     let falseArr = [];
-    currentWord.letterArr.forEach(letter =>{
-            // console.log("LETTER BOOLEAN", letter.guessed);
+    currentWordObject.letterArr.forEach(letter =>{
+        //if statement to push letters into array
         if(letter.guessed === false){
            falseArr.push(letter.letter);;
-        //    throw BreakException;
-        // }
-        // else {
-        //     console.log('Words been Guessed!');
-        //     wordGuessed = true;
         }
-       
-        
     });
-    // console.log(falseArr);
+    //if array length less than one change flag to wordGuessed true
     if(falseArr.length < 1){
         wordGuessed = true;
     }
 }
 
 const playGame = ()=> {
+    //check status of the word
     checkWordGuessed();
-    // console.log("GUESSEWORD-PLAYGAME 1", guessedWord);
     //if word not guessed get letter
     if(!wordGuessed){
         inquirer.prompt([
@@ -62,11 +58,11 @@ const playGame = ()=> {
                 name: "letter"
             }
         ]).then(letter =>{
-            // console.log("LETTER FROM INQUIRER", letter.letter);
+        //create temporary variable of the word before checking the letter against the letter object
         let previousWord = guessedWord;
-        // console.log("CURRENT WORD", previousWord);
+        //check letter from inquirer
         checkPlayerGuess(letter.letter);
-        //check to see if the guess was right
+        //check to see if the guess was right (is the previous same or different from newly built string)
         if(previousWord === guessedWord ){
             guesses--;
             //check to see if any guesses are remaining
@@ -85,6 +81,7 @@ const playGame = ()=> {
                     name: "playAgain"
                 }
             ]).then(answer =>{
+        //start new game if they want to play
                 if(answer.playAgain === true){
                     guesses = 7;
                     newWordCreator();
@@ -95,6 +92,7 @@ const playGame = ()=> {
             });
             }
         }
+        //if previous word and newly built word differ than alert user was correct and ask for another letter
         else{
             console.log("Correct!!!");
             console.log(guessedWord);
@@ -102,6 +100,7 @@ const playGame = ()=> {
         }
     });
     }
+    //if word is spelled (flag is true), alert them and give them another word
     else{
         console.log("You win! Next word.");
         guesses = 7;
@@ -109,4 +108,5 @@ const playGame = ()=> {
         newWordCreator();
     }
 }
+//start game
 newWordCreator();
